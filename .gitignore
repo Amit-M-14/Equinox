@@ -1,0 +1,17 @@
+# Node dependencies
+node_modules/
+dist/
+npm-debug.log
+
+# Python dependencies
+__pycache__/
+*.py[cod]
+venv/
+env/
+
+# Secrets (CRITICAL)
+.env
+.env.local
+
+# OS Files
+.DS_Store
