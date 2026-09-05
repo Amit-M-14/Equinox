@@ -71,7 +71,7 @@ sequenceDiagram
             Engine->>Engine: break loop
         end
         Engine-->>GW: stdout line (e.g. "[ACTION]: ..." / "[OBSERVATION]: ...")
-        GW->>GW: classify line; on file write, resolve absolute path
+        GW->>GW: classify line, resolving the absolute path on a file write
         GW-->>Hook: SSE: data: { type, message, path?, absolutePath? }
         Hook->>Hook: buffer chunk, split on "\n\n", parse each JSON frame
         Hook-->>UI: append to logs[] / files[]
