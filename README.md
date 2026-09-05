@@ -202,7 +202,3 @@ Equinox runs the agent's shell commands directly on the host process today — t
 - **Bidirectional interactive stdin.** `run_terminal_command` is fire-and-forget with a fixed timeout; there's no way for the agent (or a human-in-the-loop) to respond to an interactive prompt (`y/N`, a REPL, a debugger) mid-command.
 - **Structured retry/backoff for the LLM call.** The engine retries transient OpenRouter failures with fixed exponential backoff; this should move to a jittered strategy with a circuit breaker once run volume justifies it.
 - **Execution log query API.** `ExecutionLog` documents are written today but never read back — there's no endpoint yet to list or replay past runs from the UI.
-
-## License
-
-Distributed under the MIT License. See [LICENSE](LICENSE) for details.
