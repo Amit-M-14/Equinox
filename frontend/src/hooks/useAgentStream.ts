@@ -3,19 +3,33 @@ import { API_BASE_URL } from '../config';
 
 // Define the exact structure we are sending from the Node.js backend
 export interface LogMessage {
-  type: 'log' | 'error' | 'system';
+  type: 'log' | 'error' | 'system' | 'file';
   message: string;
+  path?: string;
+  absolutePath?: string;
 }
+
+export interface GeneratedFile {
+  path: string;
+  absolutePath: string;
+  writtenAt: number;
+}
+
+export type RunStatus = 'idle' | 'running' | 'completed' | 'failed';
 
 export const useAgentStream = () => {
   const [logs, setLogs] = useState<LogMessage[]>([]);
+  const [files, setFiles] = useState<GeneratedFile[]>([]);
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
+  const [status, setStatus] = useState<RunStatus>('idle');
   const [error, setError] = useState<string | null>(null);
 
   const runAgent = useCallback(async (prompt: string) => {
     // 1. Reset state for a new execution
     setLogs([]);
+    setFiles([]);
     setIsStreaming(true);
+    setStatus('running');
     setError(null);
 
     try {
@@ -40,6 +54,7 @@ export const useAgentStream = () => {
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
       let buffer = '';
+      let sawFailure = false;
 
       // 4. The Real-Time Reading Loop
       while (true) {
@@ -64,19 +79,30 @@ export const useAgentStream = () => {
 
               // Update the React state to trigger a re-render
               setLogs((prevLogs) => [...prevLogs, data]);
+
+              if (data.type === 'file' && data.path && data.absolutePath) {
+                const path = data.path;
+                const absolutePath = data.absolutePath;
+                setFiles((prevFiles) => [...prevFiles, { path, absolutePath, writtenAt: Date.now() }]);
+              }
+
+              const exitMatch = data.message.match(/Process exited with code (\d+)/);
+              if (exitMatch) sawFailure = exitMatch[1] !== '0';
             } catch {
               console.error('[FRONTEND ERROR]: Failed to parse SSE chunk', line);
             }
           }
         }
       }
+      setStatus(sawFailure ? 'failed' : 'completed');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred while connecting to the agent engine.';
       setError(message);
+      setStatus('failed');
     } finally {
       setIsStreaming(false); // Cleanly close the streaming state
     }
   }, []);
 
-  return { logs, isStreaming, error, runAgent };
+  return { logs, files, isStreaming, status, error, runAgent };
 };

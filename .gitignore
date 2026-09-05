@@ -15,3 +15,9 @@ env/
 
 # OS Files
 .DS_Store
+
+# Agent-generated output (the Engine writes here at runtime; keep the repo
+# clean of whatever prompts happen to produce). Files already committed
+# before this rule stay tracked.
+/workspace/*
+!/workspace/.gitkeep

@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useAgentStream } from '../hooks/useAgentStream';
-import TerminalHeader from './TerminalHeader';
-import TerminalOutput from './TerminalOutput';
-import TerminalInputBar from './TerminalInputBar';
+import AppHeader from './AppHeader';
+import ExecutionLogPanel from './ExecutionLogPanel';
+import GeneratedFilesPanel from './GeneratedFilesPanel';
+import PromptBar from './PromptBar';
 
 export default function TerminalUI() {
   const [prompt, setPrompt] = useState('');
-  const { logs, isStreaming, error, runAgent } = useAgentStream();
+  const { logs, files, isStreaming, status, error, runAgent } = useAgentStream();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -15,18 +16,26 @@ export default function TerminalUI() {
     setPrompt('');
   };
 
+  const workspaceLog = logs.find((log) => log.type === 'system' && log.message.includes('Workspace directory:'));
+  const workspaceRoot = workspaceLog
+    ? workspaceLog.message.replace(/^\[SYSTEM\]:\s*Workspace directory:\s*/, '')
+    : null;
+
   return (
-    <div className="flex flex-col h-screen bg-slate-950 p-4 md:p-8 font-sans">
-      <div className="max-w-5xl w-full mx-auto flex flex-col h-full border border-slate-800 rounded-xl overflow-hidden shadow-2xl bg-slate-900">
-        <TerminalHeader />
-        <TerminalOutput logs={logs} isStreaming={isStreaming} error={error} />
-        <TerminalInputBar
-          prompt={prompt}
-          onPromptChange={setPrompt}
-          onSubmit={handleSubmit}
-          isStreaming={isStreaming}
-        />
-      </div>
+    <div className="flex h-screen flex-col bg-neutral-950 text-neutral-100">
+      <AppHeader status={status} />
+
+      <main className="mx-auto flex w-full max-w-6xl flex-1 gap-4 overflow-hidden p-4">
+        <ExecutionLogPanel logs={logs} isStreaming={isStreaming} error={error} />
+        <GeneratedFilesPanel files={files} workspaceRoot={workspaceRoot} />
+      </main>
+
+      <PromptBar
+        prompt={prompt}
+        onPromptChange={setPrompt}
+        onSubmit={handleSubmit}
+        isStreaming={isStreaming}
+      />
     </div>
   );
 }
