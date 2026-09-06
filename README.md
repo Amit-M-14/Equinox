@@ -18,7 +18,6 @@ The interesting engineering here isn't the LLM call. It's everything around it: 
 - [Environment Variables](#environment-variables)
 - [SSE Event Contract](#sse-event-contract)
 - [Known Limitations & Roadmap](#known-limitations--roadmap)
-- [License](#license)
 
 ---
 
